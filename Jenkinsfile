@@ -1,11 +1,11 @@
 pipeline {
-    agent none // 1. Tell Jenkins: "Do not run globally on the main server"
+    agent none 
 
     stages {
         stage('Install Dependencies') {
             agent {
                 docker { 
-                    image 'composer:2' // 2. Use this specific image for this stage
+                    image 'composer:2' 
                     args '-v /var/run/docker.sock:/var/run/docker.sock' 
                 }
             }
@@ -17,7 +17,7 @@ pipeline {
 
         stage('Environment Setup') {
              agent {
-                docker { image 'php:8.2-cli' } // 3. Use PHP CLI for artisan commands
+                docker { image 'php:8.2-cli' } 
             }
             steps {
                 sh 'cp .env.example .env'
@@ -30,17 +30,17 @@ pipeline {
                 docker { image 'php:8.2-cli' }
             }
             steps {
-                // Create a dummy test report file if you don't have real tests yet
-                // so the post-action doesn't fail
                 sh 'mkdir -p tests/report'
+                // The "|| true" ensures the build continues even if tests fail,
+                // so the post-action can still record the results.
                 sh './vendor/bin/phpunit --log-junit tests/report/results.xml || true' 
             }
-        }
-    }
-
-    post {
-        always {
-            junit allowEmptyResults: true, testResults: 'tests/report/*.xml'
+            // MOVE THE POST BLOCK HERE 👇
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'tests/report/*.xml'
+                }
+            }
         }
     }
 }
