@@ -3,7 +3,7 @@ services:
         image: my-laravel-app:latest # The image you built in Jenkins
         environment:
             - DB_HOST=db        # The service name below acts as the hostname!
-            - DB_PORT=3306
+            - DB_PORT=3307
             - DB_DATABASE=laravel_db
             - DB_USERNAME=laravel_user
             - DB_PASSWORD=secret_password
@@ -23,7 +23,7 @@ services:
         volumes:
             - db_data:/var/lib/mysql # Persist data even if container stops
         ports:
-            - "3306:3306" # Optional: Open port if you want to connect via TablePlus/HeidiSQL
+            - "3307:3306" # Optional: Open port if you want to connect via TablePlus/HeidiSQL
 
     nginx:
         image: nginx:alpine
