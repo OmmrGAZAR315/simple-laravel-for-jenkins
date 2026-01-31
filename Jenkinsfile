@@ -91,7 +91,7 @@ pipeline {
                     sh 'docker compose up -d'
 
                     sh 'sleep 10'
-                    sh 'docker compose exec app -T php artisan mgirate --force'
+                    sh 'docker compose exec -T app php artisan mgirate --force'
                 }
             }
         }
