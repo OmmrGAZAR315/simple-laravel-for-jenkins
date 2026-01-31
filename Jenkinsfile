@@ -66,6 +66,24 @@ pipeline {
                 }
             }
         }
+        stage('Build & Tag Nginx') {
+            agent {
+                docker {
+                    image 'docker:latest'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    echo "Building Nginx Image..."
+                    // -f tells Docker to use a specific filename instead of standard 'Dockerfile'
+                    sh "docker build -t my-nginx:${BUILD_NUMBER} -f Dockerfile.nginx ."
+
+                    // Tag as latest so docker-compose can find it easily
+                    sh "docker tag my-nginx:${BUILD_NUMBER} my-nginx:latest"
+                }
+            }
+        }
 
         // 👇 THIS IS THE NEW DEPLOY STAGE 👇
         stage('Deploy to Production') {
@@ -85,7 +103,7 @@ pipeline {
                     sh 'docker compose down || true'
 
                     // 2. Start the new stack in detached mode
-                    sh 'docker compose up -d --build'
+                    sh 'docker compose up -d'
 
                     // 3. Wait for MySQL to initialize
                     // (Vital! Otherwise the migration command below will fail)

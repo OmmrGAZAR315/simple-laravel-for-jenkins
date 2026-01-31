@@ -26,10 +26,7 @@ services:
             - "3307:3306" # Optional: Open port if you want to connect via TablePlus/HeidiSQL
 
     nginx:
-        image: nginx:alpine
-        build:
-            context: .
-            dockerfile: Dockerfile.nginx
+        image: my-nginx:latest
         volumes:
             - web-root:/var/www/html
         ports:
