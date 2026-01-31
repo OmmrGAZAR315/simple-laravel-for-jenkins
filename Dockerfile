@@ -20,7 +20,7 @@ COPY . /var/www/html
 
 # Install Composer dependencies (Production mode)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
 # Set permissions for Laravel storage
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache

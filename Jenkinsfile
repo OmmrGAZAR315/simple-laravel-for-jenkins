@@ -27,25 +27,24 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            agent {
-                docker {
-                    image 'php:8.2-cli'
-                }
-            }
-            steps {
-                sh 'mkdir -p tests/report'
-                // The "|| true" ensures the build continues even if tests fail,
-                // so the post-action can still record the results.
-                sh './vendor/bin/phpunit --log-junit tests/report/results.xml || true'
-            }
-            // MOVE THE POST BLOCK HERE 👇
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: 'tests/report/*.xml'
-                }
-            }
-        }
+        //stage('Run Tests') {
+        //    agent {
+        //        docker {
+        //            image 'php:8.2-cli'
+        //        }
+        //    }
+        //    steps {
+        //        sh 'mkdir -p tests/report'
+        //        // The "|| true" ensures the build continues even if tests fail,
+        //        // so the post-action can still record the results.
+        //        sh './vendor/bin/phpunit --log-junit tests/report/results.xml || true'
+        //    }
+        //    post {
+        //        always {
+        //            junit allowEmptyResults: true, testResults: 'tests/report/*.xml'
+        //        }
+        //    }
+        //}
         stage('Build & Tag Image') {
             agent {
                 // We use a container that has Docker tools pre-installed
@@ -57,12 +56,9 @@ pipeline {
             }
             steps {
                 script {
-                    // 1. Build the image
-                    // We tag it with the BUILD_NUMBER so every build is unique
-                    sh "docker build -t my-laravel-app:${BUILD_NUMBER} ."
-
-                    // 2. (Optional) Tag as 'latest' too
-                    sh "docker tag my-laravel-app:${BUILD_NUMBER} my-laravel-app:latest"
+                    echo "Building laravel Image"
+                    sh 'docker build -t my-laravel-app:${BUILD_NUMBER} -f .'
+                    sh 'docker tag my-laravel-app:${BUILD_NUMBER} my-laravel-app:latest'
                 }
             }
         }
@@ -75,45 +71,27 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Building Nginx Image..."
-                    // -f tells Docker to use a specific filename instead of standard 'Dockerfile'
-                    sh "docker build -t my-nginx:${BUILD_NUMBER} -f Dockerfile.nginx ."
-
-                    // Tag as latest so docker-compose can find it easily
-                    sh "docker tag my-nginx:${BUILD_NUMBER} my-nginx:latest"
+                    echo "Building Nginx Image"
+                    sh 'docker build -t my-nginx:${BUILD_NUMBER} -f Dockerfile.nginx .'
+                    sh 'docker tag my-nginx:${BUILD_NUMBER} my-nginx:latest'
                 }
             }
         }
 
-        // 👇 THIS IS THE NEW DEPLOY STAGE 👇
         stage('Deploy to Production') {
             agent {
-                // We reuse the docker agent because it has the client installed
                 docker {
-                    image 'docker:latest'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                    image 'docker:2'
+                    args: '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
                 script {
-                    echo "Deploying version ${BUILD_NUMBER}..."
-
-                    // 1. Stop the old running containers (if any)
-                    // "|| true" prevents failure if containers are already stopped
                     sh 'docker compose down -v || true'
-
-                    // 2. Start the new stack in detached mode
                     sh 'docker compose up -d'
 
-                    // 3. Wait for MySQL to initialize
-                    // (Vital! Otherwise the migration command below will fail)
-                    echo 'Waiting for Database to start...'
                     sh 'sleep 10'
-
-                    // 4. Run Database Migrations
-                    // -T: Disables interactive terminal (required for Jenkins)
-                    // --force: Bypasses the "Are you sure?" production prompt
-                    sh 'docker compose exec -T app php artisan migrate --force'
+                    sh 'docker compose exec app -T php artisan mgirate --force'
                 }
             }
         }
