@@ -66,5 +66,38 @@ pipeline {
                 }
             }
         }
+
+        // 👇 THIS IS THE NEW DEPLOY STAGE 👇
+        stage('Deploy to Production') {
+            agent {
+                // We reuse the docker agent because it has the client installed
+                docker {
+                    image 'docker:latest'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    echo "Deploying version ${BUILD_NUMBER}..."
+
+                    // 1. Stop the old running containers (if any)
+                    // "|| true" prevents failure if containers are already stopped
+                    sh 'docker compose down || true'
+
+                    // 2. Start the new stack in detached mode
+                    sh 'docker compose up -d'
+
+                    // 3. Wait for MySQL to initialize
+                    // (Vital! Otherwise the migration command below will fail)
+                    echo 'Waiting for Database to start...'
+                    sh 'sleep 10'
+
+                    // 4. Run Database Migrations
+                    // -T: Disables interactive terminal (required for Jenkins)
+                    // --force: Bypasses the "Are you sure?" production prompt
+                    sh 'docker compose exec -T app php artisan migrate --force'
+                }
+            }
+        }
     }
 }

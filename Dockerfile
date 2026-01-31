@@ -1,5 +1,5 @@
 # Use PHP 8.2 with Apache
-FROM php:8.2-apache
+FROM php:8.2
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -11,9 +11,6 @@ RUN apt-get update && apt-get install -y \
 
 # Install PHP extensions required by Laravel
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Enable Apache mod_rewrite for Laravel routing
-RUN a2enmod rewrite
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
