@@ -95,5 +95,22 @@ pipeline {
                 }
             }
         }
+        post {
+            success {
+                script {
+                    def oldBuildNumber = "${BUILD_NUMBER}".toInteger() - 2
+
+                    if (oldBuildNumber > 0) {
+                        echo "🗑️ Maintaining History: Keeping #${BUILD_NUMBER} and #${BUILD_NUMBER-1}. Deleting #${oldBuildNumber}..."
+
+                        sh "docker rmi my-laravel-app:${oldBuildNumber} || true"
+                         sh "docker rmi my-nginx:${oldBuildNumber} || true"
+                    }
+                }
+            }
+            always {
+                sh 'docker image prune -f'
+            }
+        }
     }
 }
