@@ -7,6 +7,8 @@ services:
             - DB_DATABASE=laravel_db
             - DB_USERNAME=laravel_user
             - DB_PASSWORD=secret_password
+        volumes:
+            - web-root:/var/www/html  # Uses the volume
         depends_on:
             - db # Wait for a database to start before starting an app
 
