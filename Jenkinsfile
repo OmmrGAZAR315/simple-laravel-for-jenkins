@@ -100,7 +100,7 @@ pipeline {
 
                     // 1. Stop the old running containers (if any)
                     // "|| true" prevents failure if containers are already stopped
-                    sh 'docker compose down || true'
+                    sh 'docker compose down -v || true'
 
                     // 2. Start the new stack in detached mode
                     sh 'docker compose up -d'
