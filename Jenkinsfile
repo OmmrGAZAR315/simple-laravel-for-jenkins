@@ -81,7 +81,7 @@ pipeline {
         stage('Deploy to Production') {
             agent {
                 docker {
-                    image 'docker:2'
+                    image 'docker:latest'
                     args: '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
