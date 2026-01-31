@@ -78,6 +78,10 @@ pipeline {
             }
             steps {
                 script {
+                    echo "--- DEBUGGING FILES ---"
+                    sh 'ls -la'  // 👈 THIS will list every file Jenkins sees
+                    echo "-----------------------"
+
                     echo "Deploying version ${BUILD_NUMBER}..."
 
                     // 1. Stop the old running containers (if any)
