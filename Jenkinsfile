@@ -57,7 +57,7 @@ pipeline {
             steps {
                 script {
                     echo "Building laravel Image"
-                    sh 'docker build -t my-laravel-app:${BUILD_NUMBER} -f .'
+                    sh 'docker build -t my-laravel-app:${BUILD_NUMBER} .'
                     sh 'docker tag my-laravel-app:${BUILD_NUMBER} my-laravel-app:latest'
                 }
             }
