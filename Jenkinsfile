@@ -78,10 +78,6 @@ pipeline {
             }
             steps {
                 script {
-                    echo "--- DEBUGGING FILES ---"
-                    sh 'ls -la'  // 👈 THIS will list every file Jenkins sees
-                    echo "-----------------------"
-
                     echo "Deploying version ${BUILD_NUMBER}..."
 
                     // 1. Stop the old running containers (if any)
@@ -89,7 +85,7 @@ pipeline {
                     sh 'docker compose down || true'
 
                     // 2. Start the new stack in detached mode
-                    sh 'docker compose up -d'
+                    sh 'docker compose up -d --build'
 
                     // 3. Wait for MySQL to initialize
                     // (Vital! Otherwise the migration command below will fail)
